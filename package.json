@@ -1,0 +1,51 @@
+{
+  "name": "se2-correlate",
+  "version": "0.0.0",
+  "description": "Correlation over the 2D rigid motion group for images",
+  "main": "se2corr.js",
+  "directories": {
+    "example": "example"
+  },
+  "dependencies": {
+    "image-rotate": "~0.0.2",
+    "ndarray-scratch": "0.0.1",
+    "ndarray-ops": "~1.1.1",
+    "ndarray-complex": "~1.0.0",
+    "ndarray-fft": "~0.1.0",
+    "cwise": "~0.4.0"
+  },
+  "devDependencies": {
+    "game-shell-orbit-camera": "~0.0.0",
+    "get-pixels": "~1.0.1",
+    "gl-matrix": "~2.0.0",
+    "gl-now": "~0.0.4",
+    "raymarch": "~0.0.0",
+    "zeros": "~0.0.0",
+    "beefy": "0.5.0",
+    "save-pixels": "~0.3.0",
+    "ndarray-canvas": "0.0.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "beefy  --cwd example/ example.js --live --open"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mikolalysenko/se2-correlate.git"
+  },
+  "keywords": [
+    "se2",
+    "rigid",
+    "motion",
+    "rotation",
+    "translation",
+    "correlation",
+    "image",
+    "ndarray"
+  ],
+  "author": "Mikola Lysenko",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mikolalysenko/se2-correlate/issues"
+  }
+}

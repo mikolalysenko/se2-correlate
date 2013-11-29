@@ -4,13 +4,15 @@ var zeros = require("zeros")
 var ops = require("ndarray-ops")
 var getPixels = require("get-pixels")
 var se2corr = require("../se2corr.js")
+var render = require("ndarray-canvas")
+var savePixels = require("save-pixels")
 
-getPixels("/robot.png", function(err, robotPixels) {
-  getPixels("/maze.png", function(err, mazePixels) {
-    var robot = ops.neqs(robotPixels.pick(undefined, undefined, 0), 255)
-    var maze = ops.neqs(mazePixels.pick(undefined, undefined, 0), 255)
+getPixels("robot.png", function(err, robotPixels) {
+  getPixels("maze.png", function(err, mazePixels) {
+    var robot = ops.neqseq(robotPixels.pick(undefined, undefined, 3), 0)
+    var maze = ops.ltseq(mazePixels.pick(undefined, undefined, 0), 128)
 
-    var voxels = zeros([64, 512, 512])
+    var voxels = zeros([64, 256, 256])
     se2corr(voxels, robot, maze)
 
     //Display stuff
@@ -32,6 +34,5 @@ getPixels("/robot.png", function(err, robotPixels) {
       viewer.view = camera.view()
       viewer.draw()
     })
-
   })
 })
