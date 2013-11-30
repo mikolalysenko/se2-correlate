@@ -1,10 +1,10 @@
-se2-correlation
-===============
+se2-correlate
+=============
 Computes the cross correlation for 2D images over the group of rigid motions.
 
 ## Install
 
-    npm install se2-correlation
+    npm install se2-correlate
 
 ## Example
 
@@ -28,6 +28,9 @@ getPixels("robot.png", function(err, robotPixels) {
   })
 })
 ```
+
+[Here is an interactive visualization](https://mikolalysenko.github.io/se2-correlate)
+
 
 ## `require("se2-correlation")(out, a, b)`
 Computes the cross correlation of two 2D images over the group of rigid motions.  The value of the output at a given pixel is determined by,
