@@ -47,7 +47,7 @@ shell.on("gl-init", function() {
     })
   })
 })
-},{"../se2corr.js":2,"raymarch":3,"gl-now":4,"gl-matrix":5,"game-shell-orbit-camera":6,"zeros":7,"ndarray-ops":8,"get-pixels":9,"ndarray-canvas":10}],5:[function(require,module,exports){
+},{"../se2corr.js":2,"raymarch":3,"gl-now":4,"game-shell-orbit-camera":5,"gl-matrix":6,"zeros":7,"ndarray-ops":8,"get-pixels":9,"ndarray-canvas":10}],6:[function(require,module,exports){
 (function(){/**
  * @fileoverview gl-matrix - High performance matrix and vector operations
  * @author Brandon Jones
@@ -3187,7 +3187,7 @@ function se2Correlate(out, a, b) {
   
   return out
 }
-},{"cwise":11,"ndarray-complex":12,"ndarray-ops":8,"ndarray-scratch":13,"ndarray-fft":14,"image-rotate":15}],10:[function(require,module,exports){
+},{"cwise":11,"ndarray-complex":12,"ndarray-ops":8,"ndarray-fft":13,"ndarray-scratch":14,"image-rotate":15}],10:[function(require,module,exports){
 module.exports = function ndarrayCanvas(canvas, red, green, blue) {
   if (!green || !blue) return toCanvas(canvas, red, red, red)
   return toCanvas(canvas, red, green, blue)
@@ -3220,102 +3220,7 @@ function toCanvas(canvas, red, green, blue) {
   return canvas
 }
 
-},{}],4:[function(require,module,exports){
-"use strict"
-
-var makeGameShell = require("game-shell")
-var webglew = require("webglew")
-
-function createGLShell(options) {
-  options = options || {}
-  
-  var extensions = options.extensions || []
-
-  //First create shell
-  var shell = makeGameShell(options)
-
-  shell.on("init", function initGLNow() {
-  
-    //Create canvas
-    var canvas = document.createElement("canvas")
-    
-    //Try initializing WebGL
-    var gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl")
-    if(!gl) {
-      shell.emit("gl-error", new Error("Unable to initialize WebGL"))
-      return
-    }
-    
-    //Check extensions
-    var ext = webglew(gl)
-    for(var i=0; i<extensions.length; ++i) {
-      if(!(extensions[i] in ext)) {
-        shell.emit("gl-error", new Error("Missing extension: " + extensions[i]))
-        return
-      }
-    }
-
-    //Set canvas style
-    canvas.style.position = "absolute"
-    canvas.style.left = "0px"
-    canvas.style.top = "0px"
-    shell.element.appendChild(canvas)
-
-    //Load width/height
-    canvas.width = shell.width
-    canvas.height = shell.height
-    
-    //Add variables to game-shell
-    shell.canvas = canvas
-    shell.gl = gl
-    
-    //Load default parameters
-    shell.clearFlags = options.clearFlags === undefined ? (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT) : options.clearFlags
-    shell.clearColor = options.clearColor || [0.2, 0.4, 0.8, 1.0]
-    shell.clearDepth = options.clearDepth || 1.0
-    shell.clearStencil = options.clearStencil || 0
-    
-    shell.on("resize", function(w, h) {
-      canvas.width = w
-      canvas.height = h
-    })
-
-    //Hook render event
-    shell.on("render", function renderGLNow(t) {
-    
-      //Bind default framebuffer
-      gl.bindFramebuffer(gl.FRAMEBUFFER, null)
-      
-      //Set viewport
-      gl.viewport(0, 0, shell.width, shell.height)
-      
-      //Clear buffers
-      if(shell.clearFlags & gl.STENCIL_BUFFER_BIT) {
-        gl.clearStencil(shell.clearStencil)
-      }
-      if(shell.clearFlags & gl.COLOR_BUFFER_BIT) {
-        gl.clearColor(shell.clearColor[0], shell.clearColor[1], shell.clearColor[2], shell.clearColor[3])
-      }
-      if(shell.clearFlags & gl.DEPTH_BUFFER_BIT) {
-        gl.clearDepth(shell.clearDepth)
-      }
-      if(shell.clearFlags) {
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT)
-      }
-    
-      //Render frame
-      shell.emit("gl-render", t)
-    })
-    
-    //WebGL initialized
-    shell.emit("gl-init")
-  })
-  
-  return shell
-}
-
-module.exports = createGLShell
-},{"game-shell":16,"webglew":17}],6:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 "use strict"
 
 var createOrbitCamera = require("orbit-camera")
@@ -3351,19 +3256,7 @@ function attachCamera(shell) {
 }
 
 module.exports = attachCamera
-},{"orbit-camera":18}],7:[function(require,module,exports){
-"use strict"
-
-var ndarray = require("ndarray")
-
-module.exports = function zeros(shape) {
-  var sz = 1
-  for(var i=0; i<shape.length; ++i) {
-    sz *= shape[i]
-  }
-  return ndarray(new Float64Array(sz), shape)
-}
-},{"ndarray":19}],8:[function(require,module,exports){
+},{"orbit-camera":16}],8:[function(require,module,exports){
 "use strict"
 
 var compile = require("cwise-compiler")
@@ -3812,7 +3705,114 @@ exports.assigns = makeOp({
   funcName: "assigns" })
 
 
-},{"cwise-compiler":20}],9:[function(require,module,exports){
+},{"cwise-compiler":17}],4:[function(require,module,exports){
+"use strict"
+
+var makeGameShell = require("game-shell")
+var webglew = require("webglew")
+
+function createGLShell(options) {
+  options = options || {}
+  
+  var extensions = options.extensions || []
+
+  //First create shell
+  var shell = makeGameShell(options)
+
+  shell.on("init", function initGLNow() {
+  
+    //Create canvas
+    var canvas = document.createElement("canvas")
+    
+    //Try initializing WebGL
+    var gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl")
+    if(!gl) {
+      shell.emit("gl-error", new Error("Unable to initialize WebGL"))
+      return
+    }
+    
+    //Check extensions
+    var ext = webglew(gl)
+    for(var i=0; i<extensions.length; ++i) {
+      if(!(extensions[i] in ext)) {
+        shell.emit("gl-error", new Error("Missing extension: " + extensions[i]))
+        return
+      }
+    }
+
+    //Set canvas style
+    canvas.style.position = "absolute"
+    canvas.style.left = "0px"
+    canvas.style.top = "0px"
+    shell.element.appendChild(canvas)
+
+    //Load width/height
+    canvas.width = shell.width
+    canvas.height = shell.height
+    
+    //Add variables to game-shell
+    shell.canvas = canvas
+    shell.gl = gl
+    
+    //Load default parameters
+    shell.clearFlags = options.clearFlags === undefined ? (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT) : options.clearFlags
+    shell.clearColor = options.clearColor || [0.2, 0.4, 0.8, 1.0]
+    shell.clearDepth = options.clearDepth || 1.0
+    shell.clearStencil = options.clearStencil || 0
+    
+    shell.on("resize", function(w, h) {
+      canvas.width = w
+      canvas.height = h
+    })
+
+    //Hook render event
+    shell.on("render", function renderGLNow(t) {
+    
+      //Bind default framebuffer
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+      
+      //Set viewport
+      gl.viewport(0, 0, shell.width, shell.height)
+      
+      //Clear buffers
+      if(shell.clearFlags & gl.STENCIL_BUFFER_BIT) {
+        gl.clearStencil(shell.clearStencil)
+      }
+      if(shell.clearFlags & gl.COLOR_BUFFER_BIT) {
+        gl.clearColor(shell.clearColor[0], shell.clearColor[1], shell.clearColor[2], shell.clearColor[3])
+      }
+      if(shell.clearFlags & gl.DEPTH_BUFFER_BIT) {
+        gl.clearDepth(shell.clearDepth)
+      }
+      if(shell.clearFlags) {
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT)
+      }
+    
+      //Render frame
+      shell.emit("gl-render", t)
+    })
+    
+    //WebGL initialized
+    shell.emit("gl-init")
+  })
+  
+  return shell
+}
+
+module.exports = createGLShell
+},{"game-shell":18,"webglew":19}],7:[function(require,module,exports){
+"use strict"
+
+var ndarray = require("ndarray")
+
+module.exports = function zeros(shape) {
+  var sz = 1
+  for(var i=0; i<shape.length; ++i) {
+    sz *= shape[i]
+  }
+  return ndarray(new Float64Array(sz), shape)
+}
+},{"ndarray":20}],9:[function(require,module,exports){
 "use strict"
 
 var ndarray = require("ndarray")
@@ -3834,7 +3834,7 @@ module.exports = function getPixels(url, cb) {
   img.src = url
 }
 
-},{"ndarray":21}],17:[function(require,module,exports){
+},{"ndarray":21}],19:[function(require,module,exports){
 "use strict";
 
 var VENDOR_PREFIX = [
@@ -3907,7 +3907,7 @@ function createCWise(user_args) {
 
 module.exports = createCWise
 
-},{"cwise-parser":22,"cwise-compiler":23}],13:[function(require,module,exports){
+},{"cwise-parser":22,"cwise-compiler":23}],14:[function(require,module,exports){
 "use strict"
 
 var ndarray = require("ndarray")
@@ -3956,7 +3956,113 @@ function rotateImage(out, inp, theta, iX, iY, oX, oY) {
 },{"ndarray-warp":26}],27:[function(require,module,exports){
 // nothing to see here... no file methods for the browser
 
-},{}],28:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
+"use strict"
+
+var createThunk = require("./lib/thunk.js")
+
+function Procedure() {
+  this.argTypes = []
+  this.shimArgs = []
+  this.arrayArgs = []
+  this.scalarArgs = []
+  this.indexArgs = []
+  this.shapeArgs = []
+  this.funcName = ""
+  this.pre = null
+  this.body = null
+  this.post = null
+  this.debug = false
+}
+
+function compileCwise(user_args) {
+  //Create procedure
+  var proc = new Procedure()
+  
+  //Parse blocks
+  proc.pre    = user_args.pre
+  proc.body   = user_args.body
+  proc.post   = user_args.post
+
+  //Parse arguments
+  var proc_args = user_args.args.slice(0)
+  proc.argTypes = proc_args
+  for(var i=0; i<proc_args.length; ++i) {
+    switch(proc_args[i]) {
+      case "array":
+        proc.arrayArgs.push(i)
+        proc.shimArgs.push("array" + i)
+        if(i < proc.pre.args.length && proc.pre.args[i].count>0) {
+          throw new Error("cwise: pre() block may not reference array args")
+        }
+        if(i < proc.post.args.length && proc.post.args[i].count>0) {
+          throw new Error("cwise: post() block may not reference array args")
+        }
+      break
+      case "scalar":
+        proc.scalarArgs.push(i)
+        proc.shimArgs.push("scalar" + i)
+      break
+      case "index":
+        proc.indexArgs.push(i)
+        if(i < proc.pre.args.length && proc.pre.args[i].count > 0) {
+          throw new Error("cwise: pre() block may not reference array index")
+        }
+        if(i < proc.body.args.length && proc.body.args[i].lvalue) {
+          throw new Error("cwise: body() block may not write to array index")
+        }
+        if(i < proc.post.args.length && proc.post.args[i].count > 0) {
+          throw new Error("cwise: post() block may not reference array index")
+        }
+      break
+      case "shape":
+        proc.shapeArgs.push(i)
+        if(i < proc.pre.args.length && proc.pre.args[i].lvalue) {
+          throw new Error("cwise: pre() block may not write to array shape")
+        }
+        if(i < proc.body.args.length && proc.body.args[i].lvalue) {
+          throw new Error("cwise: body() block may not write to array shape")
+        }
+        if(i < proc.post.args.length && proc.post.args[i].lvalue) {
+          throw new Error("cwise: post() block may not write to array shape")
+        }
+      break
+      default:
+        throw new Error("cwise: Unknown argument type " + proc_args[i])
+    }
+  }
+  
+  //Make sure at least one array argument was specified
+  if(proc.arrayArgs.length <= 0) {
+    throw new Error("cwise: No array arguments specified")
+  }
+  
+  //Make sure arguments are correct
+  if(proc.pre.args.length > proc_args.length) {
+    throw new Error("cwise: Too many arguments in pre() block")
+  }
+  if(proc.body.args.length > proc_args.length) {
+    throw new Error("cwise: Too many arguments in body() block")
+  }
+  if(proc.post.args.length > proc_args.length) {
+    throw new Error("cwise: Too many arguments in post() block")
+  }
+
+  //Check debug flag
+  proc.debug = !!user_args.printCode || !!user_args.debug
+  
+  //Retrieve name
+  proc.funcName = user_args.funcName || "cwise"
+  
+  //Read in block size
+  proc.blockSize = user_args.blockSize || 64
+
+  return createThunk(proc)
+}
+
+module.exports = compileCwise
+
+},{"./lib/thunk.js":28}],29:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -4010,7 +4116,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 (function(process){if (!process.EventEmitter) process.EventEmitter = function () {};
 
 var EventEmitter = exports.EventEmitter = process.EventEmitter;
@@ -4196,113 +4302,7 @@ EventEmitter.prototype.listeners = function(type) {
 };
 
 })(require("__browserify_process"))
-},{"__browserify_process":28}],20:[function(require,module,exports){
-"use strict"
-
-var createThunk = require("./lib/thunk.js")
-
-function Procedure() {
-  this.argTypes = []
-  this.shimArgs = []
-  this.arrayArgs = []
-  this.scalarArgs = []
-  this.indexArgs = []
-  this.shapeArgs = []
-  this.funcName = ""
-  this.pre = null
-  this.body = null
-  this.post = null
-  this.debug = false
-}
-
-function compileCwise(user_args) {
-  //Create procedure
-  var proc = new Procedure()
-  
-  //Parse blocks
-  proc.pre    = user_args.pre
-  proc.body   = user_args.body
-  proc.post   = user_args.post
-
-  //Parse arguments
-  var proc_args = user_args.args.slice(0)
-  proc.argTypes = proc_args
-  for(var i=0; i<proc_args.length; ++i) {
-    switch(proc_args[i]) {
-      case "array":
-        proc.arrayArgs.push(i)
-        proc.shimArgs.push("array" + i)
-        if(i < proc.pre.args.length && proc.pre.args[i].count>0) {
-          throw new Error("cwise: pre() block may not reference array args")
-        }
-        if(i < proc.post.args.length && proc.post.args[i].count>0) {
-          throw new Error("cwise: post() block may not reference array args")
-        }
-      break
-      case "scalar":
-        proc.scalarArgs.push(i)
-        proc.shimArgs.push("scalar" + i)
-      break
-      case "index":
-        proc.indexArgs.push(i)
-        if(i < proc.pre.args.length && proc.pre.args[i].count > 0) {
-          throw new Error("cwise: pre() block may not reference array index")
-        }
-        if(i < proc.body.args.length && proc.body.args[i].lvalue) {
-          throw new Error("cwise: body() block may not write to array index")
-        }
-        if(i < proc.post.args.length && proc.post.args[i].count > 0) {
-          throw new Error("cwise: post() block may not reference array index")
-        }
-      break
-      case "shape":
-        proc.shapeArgs.push(i)
-        if(i < proc.pre.args.length && proc.pre.args[i].lvalue) {
-          throw new Error("cwise: pre() block may not write to array shape")
-        }
-        if(i < proc.body.args.length && proc.body.args[i].lvalue) {
-          throw new Error("cwise: body() block may not write to array shape")
-        }
-        if(i < proc.post.args.length && proc.post.args[i].lvalue) {
-          throw new Error("cwise: post() block may not write to array shape")
-        }
-      break
-      default:
-        throw new Error("cwise: Unknown argument type " + proc_args[i])
-    }
-  }
-  
-  //Make sure at least one array argument was specified
-  if(proc.arrayArgs.length <= 0) {
-    throw new Error("cwise: No array arguments specified")
-  }
-  
-  //Make sure arguments are correct
-  if(proc.pre.args.length > proc_args.length) {
-    throw new Error("cwise: Too many arguments in pre() block")
-  }
-  if(proc.body.args.length > proc_args.length) {
-    throw new Error("cwise: Too many arguments in body() block")
-  }
-  if(proc.post.args.length > proc_args.length) {
-    throw new Error("cwise: Too many arguments in post() block")
-  }
-
-  //Check debug flag
-  proc.debug = !!user_args.printCode || !!user_args.debug
-  
-  //Retrieve name
-  proc.funcName = user_args.funcName || "cwise"
-  
-  //Read in block size
-  proc.blockSize = user_args.blockSize || 64
-
-  return createThunk(proc)
-}
-
-module.exports = compileCwise
-
-},{"./lib/thunk.js":30}],12:[function(require,module,exports){
+},{"__browserify_process":29}],12:[function(require,module,exports){
 "use strict"
 
 var cwise = require("cwise")
@@ -4572,7 +4572,7 @@ exports.abs = cwise({
 //Same thing as atan2
 exports.arg = ops.atan2
 
-},{"cwise":31,"ndarray-ops":8}],14:[function(require,module,exports){
+},{"cwise":31,"ndarray-ops":8}],13:[function(require,module,exports){
 "use strict"
 
 var ops = require("ndarray-ops")
@@ -5010,7 +5010,7 @@ exports.format = function(f) {
   return str;
 };
 
-},{"events":29}],37:[function(require,module,exports){
+},{"events":30}],37:[function(require,module,exports){
 // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
 // http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
  
@@ -5424,7 +5424,7 @@ exports.nextCombination = function(v) {
 }
 
 
-},{}],16:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 "use strict"
 
 var EventEmitter = require("events").EventEmitter
@@ -6129,7 +6129,7 @@ function createShell(options) {
 }
 
 module.exports = createShell
-},{"events":29,"util":36,"./lib/raf-polyfill.js":37,"./lib/mousewheel-polyfill.js":38,"./lib/hrtime-polyfill.js":39,"domready":42,"vkey":43,"invert-hash":44,"uniq":45,"lower-bound":46,"iota-array":47}],19:[function(require,module,exports){
+},{"events":30,"util":36,"./lib/raf-polyfill.js":37,"./lib/mousewheel-polyfill.js":38,"./lib/hrtime-polyfill.js":39,"domready":42,"vkey":43,"uniq":44,"invert-hash":45,"lower-bound":46,"iota-array":47}],20:[function(require,module,exports){
 "use strict"
 
 var iota = require("iota-array")
@@ -7001,7 +7001,7 @@ function createVolumeRenderer(gl, array) {
 	//Return the volume renderer object
 	return new VolumeRenderer(gl, vao, faceBuf, vertBuf, shader, texture, [array.shape[2], array.shape[1], array.shape[0]], [zsplit[1], zsplit[0]], [gridW, gridH])
 }
-},{"fs":27,"gl-texture2d":50,"bit-twiddle":41,"gl-shader":51,"gl-vao":52,"gl-buffer":53,"ndarray":54,"typedarray-pool":55,"ndarray-ops":8,"gl-matrix":5}],30:[function(require,module,exports){
+},{"fs":27,"bit-twiddle":41,"gl-texture2d":50,"gl-shader":51,"gl-vao":52,"gl-buffer":53,"ndarray":54,"typedarray-pool":55,"ndarray-ops":8,"gl-matrix":6}],28:[function(require,module,exports){
 "use strict"
 
 var compile = require("./compile.js")
@@ -7468,20 +7468,6 @@ for(i = 112; i < 136; ++i) {
 },{}],44:[function(require,module,exports){
 "use strict"
 
-function invert(hash) {
-  var result = {}
-  for(var i in hash) {
-    if(hash.hasOwnProperty(i)) {
-      result[hash[i]] = i
-    }
-  }
-  return result
-}
-
-module.exports = invert
-},{}],45:[function(require,module,exports){
-"use strict"
-
 function unique_pred(list, compare) {
   var ptr = 1
     , len = list.length
@@ -7537,6 +7523,20 @@ function unique(list, compare, sorted) {
 }
 
 module.exports = unique
+},{}],45:[function(require,module,exports){
+"use strict"
+
+function invert(hash) {
+  var result = {}
+  for(var i in hash) {
+    if(hash.hasOwnProperty(i)) {
+      result[hash[i]] = i
+    }
+  }
+  return result
+}
+
+module.exports = invert
 },{}],46:[function(require,module,exports){
 "use strict"
 
@@ -7815,7 +7815,7 @@ function preprocess(func) {
 }
 
 module.exports = preprocess
-},{"uniq":58,"esprima":59}],49:[function(require,module,exports){
+},{"esprima":58,"uniq":59}],49:[function(require,module,exports){
 "use strict"
 
 function iota(n) {
@@ -7864,7 +7864,44 @@ function createCWise(user_args) {
 
 module.exports = createCWise
 
-},{"cwise-parser":60,"cwise-compiler":61}],24:[function(require,module,exports){
+},{"cwise-parser":60,"cwise-compiler":61}],33:[function(require,module,exports){
+"use strict"
+
+var parse   = require("cwise-parser")
+var compile = require("cwise-compiler")
+
+var REQUIRED_FIELDS = [ "args", "body" ]
+var OPTIONAL_FIELDS = [ "pre", "post", "printCode", "funcName", "blockSize" ]
+
+function createCWise(user_args) {
+  //Check parameters
+  for(var id in user_args) {
+    if(REQUIRED_FIELDS.indexOf(id) < 0 &&
+       OPTIONAL_FIELDS.indexOf(id) < 0) {
+      console.warn("cwise: Unknown argument '"+id+"' passed to expression compiler")
+    }
+  }
+  for(var i=0; i<REQUIRED_FIELDS.length; ++i) {
+    if(!user_args[REQUIRED_FIELDS[i]]) {
+      throw new Error("cwise: Missing argument: " + REQUIRED_FIELDS[i])
+    }
+  }
+  
+  //Parse blocks
+  return compile({
+    args:       user_args.args,
+    pre:        parse(user_args.pre || function(){}),
+    body:       parse(user_args.body),
+    post:       parse(user_args.post || function(){}),
+    debug:      !!user_args.printCode,
+    funcName:   user_args.funcName || user_args.body.name || "cwise",
+    blockSize:  user_args.blockSize || 64
+  })
+}
+
+module.exports = createCWise
+
+},{"cwise-parser":62,"cwise-compiler":63}],34:[function(require,module,exports){
 "use strict"
 
 var iota = require("iota-array")
@@ -8204,7 +8241,347 @@ function wrappedNDArrayCtor(data, shape, stride, offset) {
 }
 
 module.exports = wrappedNDArrayCtor
-},{"iota-array":62}],25:[function(require,module,exports){
+},{"iota-array":64}],24:[function(require,module,exports){
+"use strict"
+
+var iota = require("iota-array")
+
+var arrayMethods = [
+  "concat",
+  "join",
+  "slice",
+  "toString",
+  "indexOf",
+  "lastIndexOf",
+  "forEach",
+  "every",
+  "some",
+  "filter",
+  "map",
+  "reduce",
+  "reduceRight"
+]
+
+function compare1st(a, b) {
+  return a[0] - b[0]
+}
+
+function order() {
+  var stride = this.stride
+  var terms = new Array(stride.length)
+  var i
+  for(i=0; i<terms.length; ++i) {
+    terms[i] = [Math.abs(stride[i]), i]
+  }
+  terms.sort(compare1st)
+  var result = new Array(terms.length)
+  for(i=0; i<result.length; ++i) {
+    result[i] = terms[i][1]
+  }
+  return result
+}
+
+var ZeroArray = "function ZeroArray(a,d) {\
+this.data = a;\
+this.offset = d\
+};\
+var proto=ZeroArray.prototype;\
+proto.size=0;\
+proto.shape=[];\
+proto.stride=[];\
+proto.order=[];\
+proto.get=proto.set=function() {\
+return Number.NaN\
+};\
+proto.lo=\
+proto.hi=\
+proto.transpose=\
+proto.step=\
+proto.pick=function() {\
+return new ZeroArray(this.data,this.shape,this.stride,this.offset)\
+}"
+
+function compileConstructor(dtype, dimension) {
+  //Special case for 0d arrays
+  if(dimension === 0) {
+    var compiledProc = new Function([
+      ZeroArray,
+      "ZeroArray.prototype.dtype='"+dtype+"'",
+      "return function construct_ZeroArray(a,b,c,d){return new ZeroArray(a,d)}"].join("\n"))
+    return compiledProc()
+  }
+  var useGetters = (dtype === "generic")
+  var code = ["'use strict'"]
+    
+  //Create constructor for view
+  var indices = iota(dimension)
+  var args = indices.map(function(i) { return "i"+i })
+  var index_str = "this.offset+" + indices.map(function(i) {
+        return ["this._stride", i, "*i",i].join("")
+      }).join("+")
+  var className = ["View", dimension, "d", dtype].join("")
+  code.push(["function ", className, "(a,",
+    indices.map(function(i) {
+      return "b"+i
+    }).join(","), ",",
+    indices.map(function(i) {
+      return "c"+i
+    }).join(","), ",d){this.data=a"].join(""))
+  for(var i=0; i<dimension; ++i) {
+    code.push(["this._shape",i,"=b",i,"|0"].join(""))
+  }
+  for(var i=0; i<dimension; ++i) {
+    code.push(["this._stride",i,"=c",i,"|0"].join(""))
+  }
+  code.push("this.offset=d|0}")
+  
+  //Get prototype
+  code.push(["var proto=",className,".prototype"].join(""))
+  
+  //view.dtype:
+  code.push(["proto.dtype='", dtype, "'"].join(""))
+  code.push("proto.dimension="+dimension)
+  
+  //view.stride and view.shape
+  var strideClassName = ["VStride", dimension, "d", dtype].join("")
+  var shapeClassName = ["VShape", dimension, "d", dtype].join("")
+  var props = {"stride":strideClassName, "shape":shapeClassName}
+  for(var prop in props) {
+    var arrayName = props[prop]
+    code.push(["function ", arrayName, "(v) {this._v=v} var aproto=", arrayName, ".prototype"].join(""))
+    code.push(["aproto.length=",dimension].join(""))
+    
+    var array_elements = []
+    for(var i=0; i<dimension; ++i) {
+      array_elements.push(["this._v._", prop, i].join(""))
+    }
+    code.push(["aproto.toJSON=function ", arrayName, "_toJSON(){return [", array_elements.join(","), "]}"].join(""))
+    code.push(["aproto.toString=function ", arrayName, "_toString(){return [", array_elements.join(","), "].join()}"].join(""))
+    
+    for(var i=0; i<dimension; ++i) {
+      code.push(["Object.defineProperty(aproto,", i, ",{get:function(){return this._v._", prop, i, "},set:function(v){return this._v._", prop, i, "=v|0},enumerable:true})"].join(""))
+    }
+    for(var i=0; i<arrayMethods.length; ++i) {
+      if(arrayMethods[i] in Array.prototype) {
+        code.push(["aproto.", arrayMethods[i], "=Array.prototype.", arrayMethods[i]].join(""))
+      }
+    }
+    code.push(["Object.defineProperty(proto,'",prop,"',{get:function ", arrayName, "_get(){return new ", arrayName, "(this)},set: function ", arrayName, "_set(v){"].join(""))
+    for(var i=0; i<dimension; ++i) {
+      code.push(["this._", prop, i, "=v[", i, "]|0"].join(""))
+    }
+    code.push("return v}})")
+  }
+  
+  //view.size:
+  code.push(["Object.defineProperty(proto,'size',{get:function ",className,"_size(){\
+return ", indices.map(function(i) { return ["this._shape", i].join("") }).join("*"),
+"}})"].join(""))
+
+  //view.order:
+  if(dimension === 1) {
+    code.push("proto.order=[0]")
+  } else {
+    code.push("Object.defineProperty(proto,'order',{get:")
+    if(dimension < 4) {
+      code.push(["function ",className,"_order(){"].join(""))
+      if(dimension === 2) {
+        code.push("return (Math.abs(this._stride0)>Math.abs(this._stride1))?[1,0]:[0,1]}})")
+      } else if(dimension === 3) {
+        code.push(
+"var s0=Math.abs(this._stride0),s1=Math.abs(this._stride1),s2=Math.abs(this._stride2);\
+if(s0>s1){\
+if(s1>s2){\
+return [2,1,0];\
+}else if(s0>s2){\
+return [1,2,0];\
+}else{\
+return [1,0,2];\
+}\
+}else if(s0>s2){\
+return [2,0,1];\
+}else if(s2>s1){\
+return [0,1,2];\
+}else{\
+return [0,2,1];\
+}}})")
+      }
+    } else {
+      code.push("ORDER})")
+    }
+  }
+  
+  //view.set(i0, ..., v):
+  code.push([
+"proto.set=function ",className,"_set(", args.join(","), ",v){"].join(""))
+  if(useGetters) {
+    code.push(["return this.data.set(", index_str, ",v)}"].join(""))
+  } else {
+    code.push(["return this.data[", index_str, "]=v}"].join(""))
+  }
+  
+  //view.get(i0, ...):
+  code.push(["proto.get=function ",className,"_get(", args.join(","), "){"].join(""))
+  if(useGetters) {
+    code.push(["return this.data.get(", index_str, ")}"].join(""))
+  } else {
+    code.push(["return this.data[", index_str, "]}"].join(""))
+  }
+  
+  //view.hi():
+  code.push(["proto.hi=function ",className,"_hi(",args.join(","),"){return new ", className, "(this.data,",
+    indices.map(function(i) {
+      return ["(typeof i",i,"!=='number'||i",i,"<0)?this._shape", i, ":i", i,"|0"].join("")
+    }).join(","), ",",
+    indices.map(function(i) {
+      return "this._stride"+i
+    }).join(","), ",this.offset)}"].join(""))
+  
+  //view.lo():
+  var a_vars = indices.map(function(i) { return "a"+i+"=this._shape"+i })
+  var c_vars = indices.map(function(i) { return "c"+i+"=this._stride"+i })
+  code.push(["proto.lo=function ",className,"_lo(",args.join(","),"){var b=this.offset,d=0,", a_vars.join(","), ",", c_vars.join(",")].join(""))
+  for(var i=0; i<dimension; ++i) {
+    code.push([
+"if(typeof i",i,"==='number'&&i",i,">=0){\
+d=i",i,"|0;\
+b+=c",i,"*d;\
+a",i,"-=d}"].join(""))
+  }
+  code.push(["return new ", className, "(this.data,",
+    indices.map(function(i) {
+      return "a"+i
+    }).join(","),",",
+    indices.map(function(i) {
+      return "c"+i
+    }).join(","), ",b)}"].join(""))
+  
+  //view.step():
+  code.push(["proto.step=function ",className,"_step(",args.join(","),"){var ",
+    indices.map(function(i) {
+      return "a"+i+"=this._shape"+i
+    }).join(","), ",",
+    indices.map(function(i) {
+      return "b"+i+"=this._stride"+i
+    }).join(","),",c=this.offset,d=0,ceil=Math.ceil"].join(""))
+  for(var i=0; i<dimension; ++i) {
+    code.push([
+"if(typeof i",i,"==='number'){\
+d=i",i,"|0;\
+if(d<0){\
+c+=b",i,"*(a",i,"-1);\
+a",i,"=ceil(-a",i,"/d)\
+}else{\
+a",i,"=ceil(a",i,"/d)\
+}\
+b",i,"*=d\
+}"].join(""))
+  }
+  code.push(["return new ", className, "(this.data,",
+    indices.map(function(i) {
+      return "a" + i
+    }).join(","), ",",
+    indices.map(function(i) {
+      return "b" + i
+    }).join(","), ",c)}"].join(""))
+  
+  //view.transpose():
+  var tShape = new Array(dimension)
+  var tStride = new Array(dimension)
+  for(var i=0; i<dimension; ++i) {
+    tShape[i] = ["a[i", i, "|0]"].join("")
+    tStride[i] = ["b[i", i, "|0]"].join("")
+  }
+  code.push(["proto.transpose=function ",className,"_transpose(",args,"){var a=this.shape,b=this.stride;return new ", className, "(this.data,", tShape.join(","), ",", tStride.join(","), ",this.offset)}"].join(""))
+  
+  //view.pick():
+  code.push(["proto.pick=function ",className,"_pick(",args,"){var a=[],b=[],c=this.offset"].join(""))
+  for(var i=0; i<dimension; ++i) {
+    code.push(["if(typeof i",i,"==='number'&&i",i,">=0){c=(c+this._stride",i,"*i",i,")|0}else{a.push(this._shape",i,");b.push(this._stride",i,")}"].join(""))
+  }
+  code.push("var ctor=CTOR_LIST[a.length];return ctor(this.data,a,b,c)}")
+    
+  //Add return statement
+  code.push(["return function construct_",className,"(data,shape,stride,offset){return new ", className,"(data,",
+    indices.map(function(i) {
+      return "shape["+i+"]"
+    }).join(","), ",",
+    indices.map(function(i) {
+      return "stride["+i+"]"
+    }).join(","), ",offset)}"].join(""))
+  
+  //Compile procedure
+  var procedure = new Function("CTOR_LIST", "ORDER", code.join("\n"))
+  return procedure(CACHED_CONSTRUCTORS[dtype], order)
+}
+
+function arrayDType(data) {
+  if(data instanceof Float64Array) {
+    return "float64";
+  } else if(data instanceof Float32Array) {
+    return "float32"
+  } else if(data instanceof Int32Array) {
+    return "int32"
+  } else if(data instanceof Uint32Array) {
+    return "uint32"
+  } else if(data instanceof Uint8Array) {
+    return "uint8"
+  } else if(data instanceof Uint16Array) {
+    return "uint16"
+  } else if(data instanceof Int16Array) {
+    return "int16"
+  } else if(data instanceof Int8Array) {
+    return "int8"
+  } else if(data instanceof Array) {
+    return "array"
+  }
+  return "generic"
+}
+
+var CACHED_CONSTRUCTORS = {
+  "float32":[],
+  "float64":[],
+  "int8":[],
+  "int16":[],
+  "int32":[],
+  "uint8":[],
+  "uint16":[],
+  "uint32":[],
+  "array":[],
+  "generic":[]
+}
+
+function wrappedNDArrayCtor(data, shape, stride, offset) {
+  if(shape === undefined) {
+    shape = [ data.length ]
+  }
+  var d = shape.length
+  if(stride === undefined) {
+    stride = new Array(d)
+    for(var i=d-1, sz=1; i>=0; --i) {
+      stride[i] = sz
+      sz *= shape[i]
+    }
+  }
+  if(offset === undefined) {
+    offset = 0
+    for(var i=0; i<d; ++i) {
+      if(stride[i] < 0) {
+        offset -= (shape[i]-1)*stride[i]
+      }
+    }
+  }
+  var dtype = arrayDType(data)
+  var ctor_list = CACHED_CONSTRUCTORS[dtype]
+  while(ctor_list.length <= d) {
+    ctor_list.push(compileConstructor(dtype, ctor_list.length))
+  }
+  var ctor = ctor_list[d]
+  return ctor(data, shape, stride, offset)
+}
+
+module.exports = wrappedNDArrayCtor
+},{"iota-array":65}],25:[function(require,module,exports){
 (function(global){"use strict"
 
 var bits = require("bit-twiddle")
@@ -8488,384 +8865,7 @@ exports.clearCache = function clearCache() {
 }
 
 })(self)
-},{"bit-twiddle":63,"dup":64}],33:[function(require,module,exports){
-"use strict"
-
-var parse   = require("cwise-parser")
-var compile = require("cwise-compiler")
-
-var REQUIRED_FIELDS = [ "args", "body" ]
-var OPTIONAL_FIELDS = [ "pre", "post", "printCode", "funcName", "blockSize" ]
-
-function createCWise(user_args) {
-  //Check parameters
-  for(var id in user_args) {
-    if(REQUIRED_FIELDS.indexOf(id) < 0 &&
-       OPTIONAL_FIELDS.indexOf(id) < 0) {
-      console.warn("cwise: Unknown argument '"+id+"' passed to expression compiler")
-    }
-  }
-  for(var i=0; i<REQUIRED_FIELDS.length; ++i) {
-    if(!user_args[REQUIRED_FIELDS[i]]) {
-      throw new Error("cwise: Missing argument: " + REQUIRED_FIELDS[i])
-    }
-  }
-  
-  //Parse blocks
-  return compile({
-    args:       user_args.args,
-    pre:        parse(user_args.pre || function(){}),
-    body:       parse(user_args.body),
-    post:       parse(user_args.post || function(){}),
-    debug:      !!user_args.printCode,
-    funcName:   user_args.funcName || user_args.body.name || "cwise",
-    blockSize:  user_args.blockSize || 64
-  })
-}
-
-module.exports = createCWise
-
-},{"cwise-parser":65,"cwise-compiler":66}],34:[function(require,module,exports){
-"use strict"
-
-var iota = require("iota-array")
-
-var arrayMethods = [
-  "concat",
-  "join",
-  "slice",
-  "toString",
-  "indexOf",
-  "lastIndexOf",
-  "forEach",
-  "every",
-  "some",
-  "filter",
-  "map",
-  "reduce",
-  "reduceRight"
-]
-
-function compare1st(a, b) {
-  return a[0] - b[0]
-}
-
-function order() {
-  var stride = this.stride
-  var terms = new Array(stride.length)
-  var i
-  for(i=0; i<terms.length; ++i) {
-    terms[i] = [Math.abs(stride[i]), i]
-  }
-  terms.sort(compare1st)
-  var result = new Array(terms.length)
-  for(i=0; i<result.length; ++i) {
-    result[i] = terms[i][1]
-  }
-  return result
-}
-
-var ZeroArray = "function ZeroArray(a,d) {\
-this.data = a;\
-this.offset = d\
-};\
-var proto=ZeroArray.prototype;\
-proto.size=0;\
-proto.shape=[];\
-proto.stride=[];\
-proto.order=[];\
-proto.get=proto.set=function() {\
-return Number.NaN\
-};\
-proto.lo=\
-proto.hi=\
-proto.transpose=\
-proto.step=\
-proto.pick=function() {\
-return new ZeroArray(this.data,this.shape,this.stride,this.offset)\
-}"
-
-function compileConstructor(dtype, dimension) {
-  //Special case for 0d arrays
-  if(dimension === 0) {
-    var compiledProc = new Function([
-      ZeroArray,
-      "ZeroArray.prototype.dtype='"+dtype+"'",
-      "return function construct_ZeroArray(a,b,c,d){return new ZeroArray(a,d)}"].join("\n"))
-    return compiledProc()
-  }
-  var useGetters = (dtype === "generic")
-  var code = ["'use strict'"]
-    
-  //Create constructor for view
-  var indices = iota(dimension)
-  var args = indices.map(function(i) { return "i"+i })
-  var index_str = "this.offset+" + indices.map(function(i) {
-        return ["this._stride", i, "*i",i].join("")
-      }).join("+")
-  var className = ["View", dimension, "d", dtype].join("")
-  code.push(["function ", className, "(a,",
-    indices.map(function(i) {
-      return "b"+i
-    }).join(","), ",",
-    indices.map(function(i) {
-      return "c"+i
-    }).join(","), ",d){this.data=a"].join(""))
-  for(var i=0; i<dimension; ++i) {
-    code.push(["this._shape",i,"=b",i,"|0"].join(""))
-  }
-  for(var i=0; i<dimension; ++i) {
-    code.push(["this._stride",i,"=c",i,"|0"].join(""))
-  }
-  code.push("this.offset=d|0}")
-  
-  //Get prototype
-  code.push(["var proto=",className,".prototype"].join(""))
-  
-  //view.dtype:
-  code.push(["proto.dtype='", dtype, "'"].join(""))
-  code.push("proto.dimension="+dimension)
-  
-  //view.stride and view.shape
-  var strideClassName = ["VStride", dimension, "d", dtype].join("")
-  var shapeClassName = ["VShape", dimension, "d", dtype].join("")
-  var props = {"stride":strideClassName, "shape":shapeClassName}
-  for(var prop in props) {
-    var arrayName = props[prop]
-    code.push(["function ", arrayName, "(v) {this._v=v} var aproto=", arrayName, ".prototype"].join(""))
-    code.push(["aproto.length=",dimension].join(""))
-    
-    var array_elements = []
-    for(var i=0; i<dimension; ++i) {
-      array_elements.push(["this._v._", prop, i].join(""))
-    }
-    code.push(["aproto.toJSON=function ", arrayName, "_toJSON(){return [", array_elements.join(","), "]}"].join(""))
-    code.push(["aproto.toString=function ", arrayName, "_toString(){return [", array_elements.join(","), "].join()}"].join(""))
-    
-    for(var i=0; i<dimension; ++i) {
-      code.push(["Object.defineProperty(aproto,", i, ",{get:function(){return this._v._", prop, i, "},set:function(v){return this._v._", prop, i, "=v|0},enumerable:true})"].join(""))
-    }
-    for(var i=0; i<arrayMethods.length; ++i) {
-      if(arrayMethods[i] in Array.prototype) {
-        code.push(["aproto.", arrayMethods[i], "=Array.prototype.", arrayMethods[i]].join(""))
-      }
-    }
-    code.push(["Object.defineProperty(proto,'",prop,"',{get:function ", arrayName, "_get(){return new ", arrayName, "(this)},set: function ", arrayName, "_set(v){"].join(""))
-    for(var i=0; i<dimension; ++i) {
-      code.push(["this._", prop, i, "=v[", i, "]|0"].join(""))
-    }
-    code.push("return v}})")
-  }
-  
-  //view.size:
-  code.push(["Object.defineProperty(proto,'size',{get:function ",className,"_size(){\
-return ", indices.map(function(i) { return ["this._shape", i].join("") }).join("*"),
-"}})"].join(""))
-
-  //view.order:
-  if(dimension === 1) {
-    code.push("proto.order=[0]")
-  } else {
-    code.push("Object.defineProperty(proto,'order',{get:")
-    if(dimension < 4) {
-      code.push(["function ",className,"_order(){"].join(""))
-      if(dimension === 2) {
-        code.push("return (Math.abs(this._stride0)>Math.abs(this._stride1))?[1,0]:[0,1]}})")
-      } else if(dimension === 3) {
-        code.push(
-"var s0=Math.abs(this._stride0),s1=Math.abs(this._stride1),s2=Math.abs(this._stride2);\
-if(s0>s1){\
-if(s1>s2){\
-return [2,1,0];\
-}else if(s0>s2){\
-return [1,2,0];\
-}else{\
-return [1,0,2];\
-}\
-}else if(s0>s2){\
-return [2,0,1];\
-}else if(s2>s1){\
-return [0,1,2];\
-}else{\
-return [0,2,1];\
-}}})")
-      }
-    } else {
-      code.push("ORDER})")
-    }
-  }
-  
-  //view.set(i0, ..., v):
-  code.push([
-"proto.set=function ",className,"_set(", args.join(","), ",v){"].join(""))
-  if(useGetters) {
-    code.push(["return this.data.set(", index_str, ",v)}"].join(""))
-  } else {
-    code.push(["return this.data[", index_str, "]=v}"].join(""))
-  }
-  
-  //view.get(i0, ...):
-  code.push(["proto.get=function ",className,"_get(", args.join(","), "){"].join(""))
-  if(useGetters) {
-    code.push(["return this.data.get(", index_str, ")}"].join(""))
-  } else {
-    code.push(["return this.data[", index_str, "]}"].join(""))
-  }
-  
-  //view.hi():
-  code.push(["proto.hi=function ",className,"_hi(",args.join(","),"){return new ", className, "(this.data,",
-    indices.map(function(i) {
-      return ["(typeof i",i,"!=='number'||i",i,"<0)?this._shape", i, ":i", i,"|0"].join("")
-    }).join(","), ",",
-    indices.map(function(i) {
-      return "this._stride"+i
-    }).join(","), ",this.offset)}"].join(""))
-  
-  //view.lo():
-  var a_vars = indices.map(function(i) { return "a"+i+"=this._shape"+i })
-  var c_vars = indices.map(function(i) { return "c"+i+"=this._stride"+i })
-  code.push(["proto.lo=function ",className,"_lo(",args.join(","),"){var b=this.offset,d=0,", a_vars.join(","), ",", c_vars.join(",")].join(""))
-  for(var i=0; i<dimension; ++i) {
-    code.push([
-"if(typeof i",i,"==='number'&&i",i,">=0){\
-d=i",i,"|0;\
-b+=c",i,"*d;\
-a",i,"-=d}"].join(""))
-  }
-  code.push(["return new ", className, "(this.data,",
-    indices.map(function(i) {
-      return "a"+i
-    }).join(","),",",
-    indices.map(function(i) {
-      return "c"+i
-    }).join(","), ",b)}"].join(""))
-  
-  //view.step():
-  code.push(["proto.step=function ",className,"_step(",args.join(","),"){var ",
-    indices.map(function(i) {
-      return "a"+i+"=this._shape"+i
-    }).join(","), ",",
-    indices.map(function(i) {
-      return "b"+i+"=this._stride"+i
-    }).join(","),",c=this.offset,d=0,ceil=Math.ceil"].join(""))
-  for(var i=0; i<dimension; ++i) {
-    code.push([
-"if(typeof i",i,"==='number'){\
-d=i",i,"|0;\
-if(d<0){\
-c+=b",i,"*(a",i,"-1);\
-a",i,"=ceil(-a",i,"/d)\
-}else{\
-a",i,"=ceil(a",i,"/d)\
-}\
-b",i,"*=d\
-}"].join(""))
-  }
-  code.push(["return new ", className, "(this.data,",
-    indices.map(function(i) {
-      return "a" + i
-    }).join(","), ",",
-    indices.map(function(i) {
-      return "b" + i
-    }).join(","), ",c)}"].join(""))
-  
-  //view.transpose():
-  var tShape = new Array(dimension)
-  var tStride = new Array(dimension)
-  for(var i=0; i<dimension; ++i) {
-    tShape[i] = ["a[i", i, "|0]"].join("")
-    tStride[i] = ["b[i", i, "|0]"].join("")
-  }
-  code.push(["proto.transpose=function ",className,"_transpose(",args,"){var a=this.shape,b=this.stride;return new ", className, "(this.data,", tShape.join(","), ",", tStride.join(","), ",this.offset)}"].join(""))
-  
-  //view.pick():
-  code.push(["proto.pick=function ",className,"_pick(",args,"){var a=[],b=[],c=this.offset"].join(""))
-  for(var i=0; i<dimension; ++i) {
-    code.push(["if(typeof i",i,"==='number'&&i",i,">=0){c=(c+this._stride",i,"*i",i,")|0}else{a.push(this._shape",i,");b.push(this._stride",i,")}"].join(""))
-  }
-  code.push("var ctor=CTOR_LIST[a.length];return ctor(this.data,a,b,c)}")
-    
-  //Add return statement
-  code.push(["return function construct_",className,"(data,shape,stride,offset){return new ", className,"(data,",
-    indices.map(function(i) {
-      return "shape["+i+"]"
-    }).join(","), ",",
-    indices.map(function(i) {
-      return "stride["+i+"]"
-    }).join(","), ",offset)}"].join(""))
-  
-  //Compile procedure
-  var procedure = new Function("CTOR_LIST", "ORDER", code.join("\n"))
-  return procedure(CACHED_CONSTRUCTORS[dtype], order)
-}
-
-function arrayDType(data) {
-  if(data instanceof Float64Array) {
-    return "float64";
-  } else if(data instanceof Float32Array) {
-    return "float32"
-  } else if(data instanceof Int32Array) {
-    return "int32"
-  } else if(data instanceof Uint32Array) {
-    return "uint32"
-  } else if(data instanceof Uint8Array) {
-    return "uint8"
-  } else if(data instanceof Uint16Array) {
-    return "uint16"
-  } else if(data instanceof Int16Array) {
-    return "int16"
-  } else if(data instanceof Int8Array) {
-    return "int8"
-  } else if(data instanceof Array) {
-    return "array"
-  }
-  return "generic"
-}
-
-var CACHED_CONSTRUCTORS = {
-  "float32":[],
-  "float64":[],
-  "int8":[],
-  "int16":[],
-  "int32":[],
-  "uint8":[],
-  "uint16":[],
-  "uint32":[],
-  "array":[],
-  "generic":[]
-}
-
-function wrappedNDArrayCtor(data, shape, stride, offset) {
-  if(shape === undefined) {
-    shape = [ data.length ]
-  }
-  var d = shape.length
-  if(stride === undefined) {
-    stride = new Array(d)
-    for(var i=d-1, sz=1; i>=0; --i) {
-      stride[i] = sz
-      sz *= shape[i]
-    }
-  }
-  if(offset === undefined) {
-    offset = 0
-    for(var i=0; i<d; ++i) {
-      if(stride[i] < 0) {
-        offset -= (shape[i]-1)*stride[i]
-      }
-    }
-  }
-  var dtype = arrayDType(data)
-  var ctor_list = CACHED_CONSTRUCTORS[dtype]
-  while(ctor_list.length <= d) {
-    ctor_list.push(compileConstructor(dtype, ctor_list.length))
-  }
-  var ctor = ctor_list[d]
-  return ctor(data, shape, stride, offset)
-}
-
-module.exports = wrappedNDArrayCtor
-},{"iota-array":67}],26:[function(require,module,exports){
+},{"bit-twiddle":66,"dup":67}],26:[function(require,module,exports){
 "use strict"
 
 var interp = require("ndarray-linear-interpolate")
@@ -9189,64 +9189,6 @@ exports.nextCombination = function(v) {
 
 
 },{}],58:[function(require,module,exports){
-"use strict"
-
-function unique_pred(list, compare) {
-  var ptr = 1
-    , len = list.length
-    , a=list[0], b=list[0]
-  for(var i=1; i<len; ++i) {
-    b = a
-    a = list[i]
-    if(compare(a, b)) {
-      if(i === ptr) {
-        ptr++
-        continue
-      }
-      list[ptr++] = a
-    }
-  }
-  list.length = ptr
-  return list
-}
-
-function unique_eq(list) {
-  var ptr = 1
-    , len = list.length
-    , a=list[0], b = list[0]
-  for(var i=1; i<len; ++i, b=a) {
-    b = a
-    a = list[i]
-    if(a !== b) {
-      if(i === ptr) {
-        ptr++
-        continue
-      }
-      list[ptr++] = a
-    }
-  }
-  list.length = ptr
-  return list
-}
-
-function unique(list, compare, sorted) {
-  if(list.length === 0) {
-    return []
-  }
-  if(compare) {
-    if(!sorted) {
-      list.sort(compare)
-    }
-    return unique_pred(list, compare)
-  }
-  if(!sorted) {
-    list.sort()
-  }
-  return unique_eq(list)
-}
-
-module.exports = unique
-},{}],59:[function(require,module,exports){
 (function(){/*
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
   Copyright (C) 2012 Mathias Bynens <mathias@qiwi.be>
@@ -13157,7 +13099,65 @@ parseStatement: true, parseSourceElement: true */
 /* vim: set sw=4 ts=4 et tw=80 : */
 
 })()
-},{}],62:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
+"use strict"
+
+function unique_pred(list, compare) {
+  var ptr = 1
+    , len = list.length
+    , a=list[0], b=list[0]
+  for(var i=1; i<len; ++i) {
+    b = a
+    a = list[i]
+    if(compare(a, b)) {
+      if(i === ptr) {
+        ptr++
+        continue
+      }
+      list[ptr++] = a
+    }
+  }
+  list.length = ptr
+  return list
+}
+
+function unique_eq(list) {
+  var ptr = 1
+    , len = list.length
+    , a=list[0], b = list[0]
+  for(var i=1; i<len; ++i, b=a) {
+    b = a
+    a = list[i]
+    if(a !== b) {
+      if(i === ptr) {
+        ptr++
+        continue
+      }
+      list[ptr++] = a
+    }
+  }
+  list.length = ptr
+  return list
+}
+
+function unique(list, compare, sorted) {
+  if(list.length === 0) {
+    return []
+  }
+  if(compare) {
+    if(!sorted) {
+      list.sort(compare)
+    }
+    return unique_pred(list, compare)
+  }
+  if(!sorted) {
+    list.sort()
+  }
+  return unique_eq(list)
+}
+
+module.exports = unique
+},{}],64:[function(require,module,exports){
 "use strict"
 
 function iota(n) {
@@ -13169,7 +13169,69 @@ function iota(n) {
 }
 
 module.exports = iota
-},{}],63:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
+"use strict"
+
+function dupe_array(count, value, i) {
+  var c = count[i]|0
+  if(c <= 0) {
+    return []
+  }
+  var result = new Array(c), j
+  if(i === count.length-1) {
+    for(j=0; j<c; ++j) {
+      result[j] = value
+    }
+  } else {
+    for(j=0; j<c; ++j) {
+      result[j] = dupe_array(count, value, i+1)
+    }
+  }
+  return result
+}
+
+function dupe_number(count, value) {
+  var result, i
+  result = new Array(count)
+  for(i=0; i<count; ++i) {
+    result[i] = value
+  }
+  return result
+}
+
+function dupe(count, value) {
+  if(typeof value === "undefined") {
+    value = 0
+  }
+  switch(typeof count) {
+    case "number":
+      if(count > 0) {
+        return dupe_number(count|0, value)
+      }
+    break
+    case "object":
+      if(typeof (count.length) === "number") {
+        return dupe_array(count, value, 0)
+      }
+    break
+  }
+  return []
+}
+
+module.exports = dupe
+},{}],65:[function(require,module,exports){
+"use strict"
+
+function iota(n) {
+  var result = new Array(n)
+  for(var i=0; i<n; ++i) {
+    result[i] = i
+  }
+  return result
+}
+
+module.exports = iota
+},{}],66:[function(require,module,exports){
 /**
  * Bit twiddling hacks for JavaScript.
  *
@@ -13375,69 +13437,7 @@ exports.nextCombination = function(v) {
 }
 
 
-},{}],64:[function(require,module,exports){
-"use strict"
-
-function dupe_array(count, value, i) {
-  var c = count[i]|0
-  if(c <= 0) {
-    return []
-  }
-  var result = new Array(c), j
-  if(i === count.length-1) {
-    for(j=0; j<c; ++j) {
-      result[j] = value
-    }
-  } else {
-    for(j=0; j<c; ++j) {
-      result[j] = dupe_array(count, value, i+1)
-    }
-  }
-  return result
-}
-
-function dupe_number(count, value) {
-  var result, i
-  result = new Array(count)
-  for(i=0; i<count; ++i) {
-    result[i] = value
-  }
-  return result
-}
-
-function dupe(count, value) {
-  if(typeof value === "undefined") {
-    value = 0
-  }
-  switch(typeof count) {
-    case "number":
-      if(count > 0) {
-        return dupe_number(count|0, value)
-      }
-    break
-    case "object":
-      if(typeof (count.length) === "number") {
-        return dupe_array(count, value, 0)
-      }
-    break
-  }
-  return []
-}
-
-module.exports = dupe
 },{}],67:[function(require,module,exports){
-"use strict"
-
-function iota(n) {
-  var result = new Array(n)
-  for(var i=0; i<n; ++i) {
-    result[i] = i
-  }
-  return result
-}
-
-module.exports = iota
-},{}],71:[function(require,module,exports){
 "use strict"
 
 function dupe_array(count, value, i) {
@@ -13882,7 +13882,7 @@ exports.clearCache = function clearCache() {
 }
 
 })(self)
-},{"dup":71,"bit-twiddle":57}],18:[function(require,module,exports){
+},{"dup":71,"bit-twiddle":57}],16:[function(require,module,exports){
 "use strict"
 
 var glm = require("gl-matrix")
@@ -14028,7 +14028,7 @@ function createOrbitCamera(eye, target, up) {
 
 module.exports = createOrbitCamera
 
-},{"gl-matrix":5}],51:[function(require,module,exports){
+},{"gl-matrix":6}],51:[function(require,module,exports){
 "use strict"
 
 var glslExports = require("glsl-exports")
@@ -14720,7 +14720,7 @@ function compileCwise(user_args) {
 
 module.exports = compileCwise
 
-},{"./lib/thunk.js":78}],66:[function(require,module,exports){
+},{"./lib/thunk.js":78}],63:[function(require,module,exports){
 "use strict"
 
 var createThunk = require("./lib/thunk.js")
@@ -15615,7 +15615,7 @@ function preprocess(func) {
 }
 
 module.exports = preprocess
-},{"esprima":83,"uniq":84}],65:[function(require,module,exports){
+},{"esprima":83,"uniq":84}],62:[function(require,module,exports){
 "use strict"
 
 var esprima = require("esprima")
@@ -15848,7 +15848,7 @@ function createCWise(user_args) {
 
 module.exports = createCWise
 
-},{"cwise-parser":87,"cwise-compiler":88}],89:[function(require,module,exports){
+},{"cwise-compiler":87,"cwise-parser":88}],89:[function(require,module,exports){
 "use strict"
 
 var createThunk = require("./lib/thunk.js")
@@ -16586,65 +16586,7 @@ function createThunk(proc) {
 
 module.exports = createThunk
 
-},{"./compile.js":92}],84:[function(require,module,exports){
-"use strict"
-
-function unique_pred(list, compare) {
-  var ptr = 1
-    , len = list.length
-    , a=list[0], b=list[0]
-  for(var i=1; i<len; ++i) {
-    b = a
-    a = list[i]
-    if(compare(a, b)) {
-      if(i === ptr) {
-        ptr++
-        continue
-      }
-      list[ptr++] = a
-    }
-  }
-  list.length = ptr
-  return list
-}
-
-function unique_eq(list) {
-  var ptr = 1
-    , len = list.length
-    , a=list[0], b = list[0]
-  for(var i=1; i<len; ++i, b=a) {
-    b = a
-    a = list[i]
-    if(a !== b) {
-      if(i === ptr) {
-        ptr++
-        continue
-      }
-      list[ptr++] = a
-    }
-  }
-  list.length = ptr
-  return list
-}
-
-function unique(list, compare, sorted) {
-  if(list.length === 0) {
-    return []
-  }
-  if(compare) {
-    if(!sorted) {
-      list.sort(compare)
-    }
-    return unique_pred(list, compare)
-  }
-  if(!sorted) {
-    list.sort()
-  }
-  return unique_eq(list)
-}
-
-module.exports = unique
-},{}],83:[function(require,module,exports){
+},{"./compile.js":92}],83:[function(require,module,exports){
 (function(){/*
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
   Copyright (C) 2012 Mathias Bynens <mathias@qiwi.be>
@@ -20555,6 +20497,64 @@ parseStatement: true, parseSourceElement: true */
 /* vim: set sw=4 ts=4 et tw=80 : */
 
 })()
+},{}],84:[function(require,module,exports){
+"use strict"
+
+function unique_pred(list, compare) {
+  var ptr = 1
+    , len = list.length
+    , a=list[0], b=list[0]
+  for(var i=1; i<len; ++i) {
+    b = a
+    a = list[i]
+    if(compare(a, b)) {
+      if(i === ptr) {
+        ptr++
+        continue
+      }
+      list[ptr++] = a
+    }
+  }
+  list.length = ptr
+  return list
+}
+
+function unique_eq(list) {
+  var ptr = 1
+    , len = list.length
+    , a=list[0], b = list[0]
+  for(var i=1; i<len; ++i, b=a) {
+    b = a
+    a = list[i]
+    if(a !== b) {
+      if(i === ptr) {
+        ptr++
+        continue
+      }
+      list[ptr++] = a
+    }
+  }
+  list.length = ptr
+  return list
+}
+
+function unique(list, compare, sorted) {
+  if(list.length === 0) {
+    return []
+  }
+  if(compare) {
+    if(!sorted) {
+      list.sort(compare)
+    }
+    return unique_pred(list, compare)
+  }
+  if(!sorted) {
+    list.sort()
+  }
+  return unique_eq(list)
+}
+
+module.exports = unique
 },{}],86:[function(require,module,exports){
 "use strict"
 
@@ -25184,7 +25184,7 @@ function generateCWiseOp(proc, typesig) {
   return f()
 }
 module.exports = generateCWiseOp
-},{"uniq":97}],88:[function(require,module,exports){
+},{"uniq":97}],87:[function(require,module,exports){
 "use strict"
 
 var createThunk = require("./lib/thunk.js")
@@ -25450,7 +25450,7 @@ function through (write, end, opts) {
 
 
 })(require("__browserify_process"))
-},{"stream":100,"__browserify_process":28}],97:[function(require,module,exports){
+},{"stream":100,"__browserify_process":29}],97:[function(require,module,exports){
 "use strict"
 
 function unique_pred(list, compare) {
@@ -25508,7 +25508,7 @@ function unique(list, compare, sorted) {
 }
 
 module.exports = unique
-},{}],87:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
 "use strict"
 
 var esprima = require("esprima")
@@ -25828,7 +25828,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":29,"util":36}],98:[function(require,module,exports){
+},{"events":30,"util":36}],98:[function(require,module,exports){
 "use strict"
 
 var compile = require("./compile.js")
@@ -25877,7 +25877,65 @@ function createThunk(proc) {
 
 module.exports = createThunk
 
-},{"./compile.js":104}],101:[function(require,module,exports){
+},{"./compile.js":104}],102:[function(require,module,exports){
+"use strict"
+
+function unique_pred(list, compare) {
+  var ptr = 1
+    , len = list.length
+    , a=list[0], b=list[0]
+  for(var i=1; i<len; ++i) {
+    b = a
+    a = list[i]
+    if(compare(a, b)) {
+      if(i === ptr) {
+        ptr++
+        continue
+      }
+      list[ptr++] = a
+    }
+  }
+  list.length = ptr
+  return list
+}
+
+function unique_eq(list) {
+  var ptr = 1
+    , len = list.length
+    , a=list[0], b = list[0]
+  for(var i=1; i<len; ++i, b=a) {
+    b = a
+    a = list[i]
+    if(a !== b) {
+      if(i === ptr) {
+        ptr++
+        continue
+      }
+      list[ptr++] = a
+    }
+  }
+  list.length = ptr
+  return list
+}
+
+function unique(list, compare, sorted) {
+  if(list.length === 0) {
+    return []
+  }
+  if(compare) {
+    if(!sorted) {
+      list.sort(compare)
+    }
+    return unique_pred(list, compare)
+  }
+  if(!sorted) {
+    list.sort()
+  }
+  return unique_eq(list)
+}
+
+module.exports = unique
+},{}],101:[function(require,module,exports){
 (function(){/*
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
   Copyright (C) 2012 Mathias Bynens <mathias@qiwi.be>
@@ -29788,64 +29846,6 @@ parseStatement: true, parseSourceElement: true */
 /* vim: set sw=4 ts=4 et tw=80 : */
 
 })()
-},{}],102:[function(require,module,exports){
-"use strict"
-
-function unique_pred(list, compare) {
-  var ptr = 1
-    , len = list.length
-    , a=list[0], b=list[0]
-  for(var i=1; i<len; ++i) {
-    b = a
-    a = list[i]
-    if(compare(a, b)) {
-      if(i === ptr) {
-        ptr++
-        continue
-      }
-      list[ptr++] = a
-    }
-  }
-  list.length = ptr
-  return list
-}
-
-function unique_eq(list) {
-  var ptr = 1
-    , len = list.length
-    , a=list[0], b = list[0]
-  for(var i=1; i<len; ++i, b=a) {
-    b = a
-    a = list[i]
-    if(a !== b) {
-      if(i === ptr) {
-        ptr++
-        continue
-      }
-      list[ptr++] = a
-    }
-  }
-  list.length = ptr
-  return list
-}
-
-function unique(list, compare, sorted) {
-  if(list.length === 0) {
-    return []
-  }
-  if(compare) {
-    if(!sorted) {
-      list.sort(compare)
-    }
-    return unique_pred(list, compare)
-  }
-  if(!sorted) {
-    list.sort()
-  }
-  return unique_eq(list)
-}
-
-module.exports = unique
 },{}],105:[function(require,module,exports){
 module.exports = [
   // current
@@ -33066,7 +33066,7 @@ function through (write, end) {
 
 
 })(require("__browserify_process"))
-},{"stream":100,"__browserify_process":28}],114:[function(require,module,exports){
+},{"stream":100,"__browserify_process":29}],114:[function(require,module,exports){
 "use strict"
 
 function unique_pred(list, compare) {
